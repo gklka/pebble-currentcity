@@ -6,6 +6,7 @@ var UI = require('ui');
 var Vector2 = require('vector2');
 var Vibe = require('ui/vibe');
 var ajax = require('ajax');
+var Accel = require('ui/accel');
 
 var currentCity = "...";
 var retryLimit = 3;
@@ -36,7 +37,16 @@ function updateCity(city) {
 		
 		currentCity = city;
 		locationText.text(city);
-	}		
+	} else {
+		if (city == "...") {
+			
+			//
+			
+		} else {
+			
+			updateStatus('');
+		}
+	}
 }
 
 function downloadCityName(coords) {
@@ -75,6 +85,10 @@ function updatePosition() {
 			console.log('lat= ' + pos.coords.latitude + ' lon= ' + pos.coords.longitude);
 			downloadCityName(pos.coords);
 			retryLimit = 3;
+
+			setTimeout(function() {
+				updatePosition();
+			}, 1000 * 60 * 15); // update in every 15 mins
 		},
 		function error(err) {
 			console.log('location error (' + err.code + '): ' + err.message);
@@ -101,7 +115,7 @@ function openMainWindow() {
 	
 	mainWindow = new UI.Window({
 		backgroundColor: 'white',
-		fullscreen: true,
+		fullscreen: false,
 		scrollable: false
 	});
 
@@ -134,11 +148,20 @@ function openMainWindow() {
 	mainWindow.add(timeText);
 	mainWindow.add(locationText);
 	mainWindow.add(statusText);
-
+	
+	mainWindow.on('show', function(e) {
+		updatePosition();
+	});
+	
 	mainWindow.show();
 }
 
 ///////////////////// RUN
 
 openMainWindow();
-updatePosition();
+
+Accel.init();
+Accel.on('tap', function(e) {
+	console.log('Peek event!');
+	updatePosition();
+});
