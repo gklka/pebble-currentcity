@@ -12,6 +12,7 @@ var currentCity = "...";
 var retryLimit = 3;
 
 var mainWindow;
+var blackBg;
 var timeText;
 var locationText;
 var statusText;
@@ -24,28 +25,33 @@ function updateStatus(status) {
 
 function updateCity(city) {
 	
-	if (city != currentCity) {
-		if (city == "...") {
+	if (city == currentCity) {
 
+		if (city == "...") {
 			//
-			
 		} else {
+			// Indicate that we have finished
+			updateStatus('Updated');
+			setTimeout(function() {
+				updateStatus('');
+			}, 1000);
+		}
+
+	} else {
+		
+		if (city == "...") {
+			//
+		} else {
+			Vibe.vibrate('double');
 			
-			Vibe.vibrate('short');
-			updateStatus('');
+			updateStatus('Updated');
+			setTimeout(function() {
+				updateStatus('');
+			}, 1000);
 		}
 		
 		currentCity = city;
 		locationText.text(city);
-	} else {
-		if (city == "...") {
-			
-			//
-			
-		} else {
-			
-			updateStatus('');
-		}
 	}
 }
 
@@ -60,6 +66,7 @@ function downloadCityName(coords) {
 		var city = json.address.village;
 		if (json.address.town) city = json.address.town;
 		if (json.address.city) city = json.address.city;
+//		if (json.address.postcode) city = city + " " + json.address.postcode;
 		
 		updateCity(city);
 		
@@ -118,10 +125,16 @@ function openMainWindow() {
 		fullscreen: false,
 		scrollable: false
 	});
+	
+	blackBg = new UI.Rect({
+		backgroundColor: 'black',
+		position: new Vector2(0, 0),
+		size: new Vector2(144, 100)
+	});
 
 	timeText = new UI.TimeText({
 		text: "%H:%M",
-		color: 'black',
+		color: 'white',
 		font: 'bitham-42-bold',
 		textAlign: 'center',
 		backgroundColor: 'clear',
@@ -133,18 +146,19 @@ function openMainWindow() {
 		text: "...",
 		color: 'black',
 		font: 'gothic-24-bold',
-		position: new Vector2(0, 80),
+		position: new Vector2(0, 100),
 		size: new Vector2(144, 50)	
 	});
 	
 	statusText = new UI.Text({
 		text: "Starting...",
 		color: 'black',
-		font: 'gothic-24',
-		position: new Vector2(0, 120),
-		size: new Vector2(144, 50)
+		font: 'gothic-14',
+		position: new Vector2(0, 148),
+		size: new Vector2(144, 20)
 	});
 
+	mainWindow.add(blackBg);
 	mainWindow.add(timeText);
 	mainWindow.add(locationText);
 	mainWindow.add(statusText);
