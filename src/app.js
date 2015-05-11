@@ -10,6 +10,7 @@ var Accel = require('ui/accel');
 
 var currentCity = "...";
 var retryLimit = 3;
+var updating = false;
 
 var mainWindow;
 var blackBg;
@@ -69,6 +70,7 @@ function downloadCityName(coords) {
 //		if (json.address.postcode) city = city + " " + json.address.postcode;
 		
 		updateCity(city);
+		updating = false;
 		
 	}, function(error) {
 		
@@ -79,17 +81,21 @@ function downloadCityName(coords) {
 		} else {
 			retryLimit = 3;
 			updateStatus('Network error');
+			updating = false;
 		}
 		
 	});
 }
 
 function updatePosition() {
+	if (updating) return;
+	updating = true;
+	
 	updateStatus('Positioning...');
 	
 	navigator.geolocation.getCurrentPosition(
 		function success(pos) {
-			console.log('lat= ' + pos.coords.latitude + ' lon= ' + pos.coords.longitude);
+//			console.log('lat= ' + pos.coords.latitude + ' lon= ' + pos.coords.longitude);
 			downloadCityName(pos.coords);
 			retryLimit = 3;
 
@@ -99,6 +105,7 @@ function updatePosition() {
 		},
 		function error(err) {
 			console.log('location error (' + err.code + '): ' + err.message);
+			updating = false;
 			
 			retryLimit = retryLimit - 1;
 			if (retryLimit > -1) {
